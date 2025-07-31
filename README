@@ -18,7 +18,6 @@ SECURITY
     - set user in security context
 
 JPA
-
 - The application uses JPA to interact with the Postgres database.
 
 Exception Handling
@@ -26,6 +25,14 @@ Exception Handling
 
 Mapper
 - The application uses MapStruct to map between DTOs and entities.
+
+KAFKA
+- The application uses Kafka to save data for auditing.
+Example: when a user is created, the application sends a message to the Kafka topic "AUDIT-IN" with the audit data.
+The application has a Kafka consumer that listens to the "AUDIT-IN" topic and saves the audit data to the Postgres database in the "Audit" table.
+
+AUDIT
+- The application has an audit table that records absolutely everything that happens, and there is an endpoint that returns all audit data from the database, but only users with the ADMIN role can access this endpoint.
 
 DOCKER
 - In the application package, there is a docker-compose.yaml file that contains the containers necessary for the application — Postgres and Kafka.
