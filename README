@@ -10,6 +10,12 @@ SECURITY
 - The password is hashed using the BCrypt algorithm, the hash is stored in the Postgres database, and the login verifies it.
 - The application has two roles: Admin and User. Any newly created user will be assigned the USER role.
 - Initializer: The admin account is created at startup if it does not exist. The environment variables DEFAULT_ADMIN_USER and DEFAULT_ADMIN_PASS must be set for the account creation.
+- Filter: With this filter, Spring validates any endpoint that requires special conditions, such as the user being logged in or the user having a specific role.
+    - read the token from header
+    - extract username from token
+    - get user from database
+    - validate token
+    - set user in security context
 
 JPA
 
