@@ -1,0 +1,26 @@
+ING-HUB-PROJECT
+
+
+SECURITY
+- To use user registration and login, the application used Swagger to provide a graphical interface.
+- The application used a simple security implementation based on JWT tokens.
+- When the user logs in, the user receive a token that can be used in the header for authorization.
+- The login and register APIs can be used by anyone.
+- Every HTTP call is intercepted and checked to verify whether the user is allowed to use it (if the user are logged in, if the user have permissions, etc.).
+- The password is hashed using the BCrypt algorithm, the hash is stored in the Postgres database, and the login verifies it.
+- The application has two roles: Admin and User. Any newly created user will be assigned the USER role.
+- Initializer: The admin account is created at startup if it does not exist. The environment variables DEFAULT_ADMIN_USER and DEFAULT_ADMIN_PASS must be set for the account creation.
+
+JPA
+
+- The application uses JPA to interact with the Postgres database.
+
+Exception Handling
+- The application uses a exception handler(class ExceptionHandlerController) to catch exceptions and return appropriate HTTP responses.
+
+Mapper
+- The application uses MapStruct to map between DTOs and entities.
+
+DOCKER
+- In the application package, there is a docker-compose.yaml file that contains the containers necessary for the application — Postgres and Kafka.
+

@@ -1,4 +1,6 @@
 package com.elbit.core.services.util;
 
-public class RoleEnum {
+public enum Role {
+    USER,
+    ADMIN
 }
