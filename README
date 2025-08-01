@@ -4,7 +4,7 @@ PLEASE USE JAVA 17
 ENV VARS : DEFAULT_ADMIN_USER=admin;DEFAULT_ADMIN_PASS=admin
 
 APPLICATION DESCRIPTION
-- The application allows users to register and log into the system; they have a shopping cart where they can add products.
+- The application allows users to register and log into the system. They have a shopping cart where they can add products.
 
 APIs
 
