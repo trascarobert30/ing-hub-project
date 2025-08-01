@@ -5,11 +5,14 @@ APPLICATION DESCRIPTION
 
 APIs
 
-- addProduct - adds a product to the cart
-- deleteProduct - deletes a product from the cart
-- findCart - finds the cart for the user that is logged in
-- findProductInCart - finds a product in the cart for the user that is logged in
-- changePrice - changes the price of a product in the cart
+- /auth/register - registers a new user
+- /auth/login - logs in a user and returns a JWT token
+- /audit/all - returns all audit data (only for ADMIN users)
+- /store/addProduct - adds a product to the cart
+- /store/deleteProduct - deletes a product from the cart
+- /store/findCart - finds the cart for the user that is logged in
+- /store/findProductInCart - finds a product in the cart for the user that is logged in
+- /store/changePrice - changes the price of a product in the cart
 
 SECURITY
 - To use user registration and login, the application used Swagger to provide a graphical interface.
