@@ -1,5 +1,16 @@
 ING-HUB-PROJECT
 
+APPLICATION DESCRIPTION
+- The application allows users to register and log into the system; they have a shopping cart where they can add products.
+
+APIs
+
+- addProduct - adds a product to the cart
+- deleteProduct - deletes a product from the cart
+- findCart - finds the cart for the user that is logged in
+- findProductInCart - finds a product in the cart for the user that is logged in
+- changePrice - changes the price of a product in the cart
+
 SECURITY
 - To use user registration and login, the application used Swagger to provide a graphical interface.
 - The application used a simple security implementation based on JWT tokens.

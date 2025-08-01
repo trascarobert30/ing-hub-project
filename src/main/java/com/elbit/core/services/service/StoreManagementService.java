@@ -6,6 +6,7 @@ import com.elbit.core.services.data.Product;
 import com.elbit.core.services.data.User;
 import com.elbit.core.services.dto.CartResponse;
 import com.elbit.core.services.dto.ProductRequest;
+import com.elbit.core.services.dto.ProductResponse;
 import com.elbit.core.services.exceptions.StoreNotFoundException;
 import com.elbit.core.services.exceptions.UserNotFoundException;
 import com.elbit.core.services.mapper.CartMapper;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +54,7 @@ public class StoreManagementService {
 
     public CartResponse deleteProduct(Long productId) {
         log.info("Deleting product: {}", productId);
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new StoreNotFoundException("Product not found with ID: " + productId));
+        Product product = getProductById(productId);
         User user = getAuthenticatedUser();
         Cart cart = user.getCart();
         if (cart == null || cart.getProducts() == null) {
@@ -67,6 +68,58 @@ public class StoreManagementService {
         return cartMapper.toResponse(cart);
     }
 
+    public CartResponse changePrice(Long productId, double newPrice) {
+        log.info("Changing price for product ID: {}", productId);
+        Product product = getProductById(productId);
+        User user = getAuthenticatedUser();
+        Cart cart = user.getCart();
+        if (cart == null || cart.getProducts() == null) {
+            log.warn("Cart is empty or does not exist for user: {}", user.getUsername());
+            throw new StoreNotFoundException("Cart not found for user: " + user.getUsername());
+        }
+        product.setPrice(newPrice);
+        productRepository.save(product);
+        List<Product> updatedProducts = cart.getProducts().stream()
+                .map(p -> p.getId().equals(productId) ? product : p)
+                .collect(Collectors.toList());
+        cart.setProducts(updatedProducts);
+        cart.setTotalPrice(recalculateTotalPrice(cart.getProducts()));
+        cartRepository.save(cart);
+        sendKafkaMessage("PRODUCT_PRICE_CHANGED", "Product price changed: " + product.getName() + " for user: " + user.getUsername());
+        return cartMapper.toResponse(cart);
+    }
+
+    public CartResponse findCart() {
+        User user = getAuthenticatedUser();
+        Cart cart = user.getCart();
+        if (cart == null) {
+            log.warn("Cart not found for user: {}", user.getUsername());
+            throw new StoreNotFoundException("Cart not found for user: " + user.getUsername());
+        }
+        sendKafkaMessage("CART_FOUND", "Cart found for user: " + user.getUsername());
+        return cartMapper.toResponse(cart);
+    }
+
+    public ProductResponse findProductInCart(Long productId) {
+        User user = getAuthenticatedUser();
+        Cart cart = user.getCart();
+        if (cart == null || cart.getProducts() == null) {
+            log.warn("Cart is empty or does not exist for user: {}", user.getUsername());
+            throw new StoreNotFoundException("Cart not found for user: " + user.getUsername());
+        }
+        Product product = cart.getProducts().stream()
+                .filter(prod -> prod.getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new StoreNotFoundException("Product not found in cart with ID: " + productId));
+        sendKafkaMessage("PRODUCT_FOUND", "Product found: " + product.getName() + " for user: " + user.getUsername());
+        return productMapper.toResponse(product);
+    }
+
+    private Product getProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new StoreNotFoundException("Product not found with ID: " + productId));
+    }
+
     private Cart saveCart(User user) {
         Cart cart = user.getCart();
         if (cart == null) {
@@ -78,6 +131,12 @@ public class StoreManagementService {
         return cart;
     }
 
+    private double recalculateTotalPrice(List<Product> products) {
+        return products.stream()
+                .mapToDouble(prod -> prod.getPrice() * prod.getQuantity())
+                .sum();
+    }
+
     private void removeProductAndRecalculateTotalPrice(Cart cart, Product product) {
         if (cart.getProducts().size() == 1) {
             cart.setProducts(null);
@@ -86,10 +145,7 @@ public class StoreManagementService {
             List<Product> products = cart.getProducts();
             products.removeIf(prod -> prod.getId().equals(product.getId()));
             cart.setProducts(products);
-            double totalPrice = products.stream()
-                    .mapToDouble(prod -> prod.getPrice() * prod.getQuantity())
-                    .sum();
-            cart.setTotalPrice(totalPrice);
+            cart.setTotalPrice(recalculateTotalPrice(products));
         }
     }
 
@@ -100,10 +156,7 @@ public class StoreManagementService {
         }
         products.add(product);
         cart.setProducts(products);
-        double totalPrice = products.stream()
-                .mapToDouble(prod -> prod.getPrice() * prod.getQuantity())
-                .sum();
-        cart.setTotalPrice(totalPrice);
+        cart.setTotalPrice(recalculateTotalPrice(products));
         cartRepository.save(cart);
     }
 

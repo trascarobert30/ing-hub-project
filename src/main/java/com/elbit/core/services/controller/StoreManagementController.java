@@ -2,6 +2,7 @@ package com.elbit.core.services.controller;
 
 import com.elbit.core.services.dto.CartResponse;
 import com.elbit.core.services.dto.ProductRequest;
+import com.elbit.core.services.dto.ProductResponse;
 import com.elbit.core.services.service.StoreManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,24 @@ public class StoreManagementController {
     @Operation(summary = "Delete a product from the cart")
     public ResponseEntity<CartResponse> deleteProduct(@RequestParam Long productId) {
         return ResponseEntity.ok(storeManagementService.deleteProduct(productId));
+    }
+
+    @GetMapping("/findCart")
+    @Operation(summary = "Find the cart for the authenticated user")
+    public ResponseEntity<CartResponse> findCart() {
+        return ResponseEntity.ok(storeManagementService.findCart());
+    }
+
+    @GetMapping("/findProductInCart")
+    @Operation(summary = "Find a product in the cart by  ID")
+    public ResponseEntity<ProductResponse> findProductInCart(@RequestParam Long productId) {
+        return ResponseEntity.ok(storeManagementService.findProductInCart(productId));
+    }
+
+
+    @PutMapping("/changePrice")
+    @Operation(summary = "Change the price of a product in the cart")
+    public ResponseEntity<CartResponse> changePrice(@RequestParam Long productId, @RequestParam double newPrice) {
+        return ResponseEntity.ok(storeManagementService.changePrice(productId, newPrice));
     }
 }
