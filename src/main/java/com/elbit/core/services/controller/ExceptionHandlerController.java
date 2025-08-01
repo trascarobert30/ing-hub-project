@@ -1,5 +1,6 @@
 package com.elbit.core.services.controller;
 
+import com.elbit.core.services.exceptions.StoreNotFoundException;
 import com.elbit.core.services.exceptions.InvalidCredentialsException;
 import com.elbit.core.services.exceptions.UserNotFoundException;
 import com.elbit.core.services.exceptions.UsernameAlreadyExistsException;
@@ -26,4 +27,8 @@ public class ExceptionHandlerController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(StoreNotFoundException.class)
+    public ResponseEntity<String> handleStoreNotFoundException(StoreNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 }

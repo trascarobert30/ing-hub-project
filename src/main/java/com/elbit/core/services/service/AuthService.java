@@ -38,7 +38,7 @@ public class AuthService {
         user.setRole(Role.USER);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         userRepository.save(user);
-        sendKafkaMessage(user);
+        sendKafkaMessage("USER_REGISTERED", "User registered: " + user.getUsername());
         return ResponseEntity.ok("Registered: " + user.getUsername());
     }
 
@@ -53,18 +53,20 @@ public class AuthService {
         }
 
         String token = jwtUtil.generateToken(user.getUsername());
+        sendKafkaMessage("USER_LOGIN", "User logged in: " + user.getUsername());
         return ResponseEntity.ok(token);
     }
 
-    private void sendKafkaMessage(User user) {
+    private void sendKafkaMessage(String event, String info) {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         kafkaProducer.sendMessage("AUDIT-IN", Audit.builder()
-                .event("USER_REGISTERED")
+                .event(event)
                 .date(now.format(formatter))
-                .info("User registered: " + user.getUsername())
+                .info(info)
                 .build());
     }
+
     private boolean checkPassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }

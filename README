@@ -1,6 +1,5 @@
 ING-HUB-PROJECT
 
-
 SECURITY
 - To use user registration and login, the application used Swagger to provide a graphical interface.
 - The application used a simple security implementation based on JWT tokens.
@@ -19,6 +18,9 @@ SECURITY
 
 JPA
 - The application uses JPA to interact with the Postgres database.
+  RELATIONS:
+    USER -> ONE TO ONE -> CART
+    CART -> ONE TO MANY -> PRODUCT
 
 Exception Handling
 - The application uses a exception handler(class ExceptionHandlerController) to catch exceptions and return appropriate HTTP responses.
